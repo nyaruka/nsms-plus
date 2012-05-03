@@ -1,0 +1,293 @@
+/* Smartmin specific CSS Styles */
+
+html, body {
+    background-color: #efefef;
+}
+
+.navbar .nav > li > a {
+    color: #FFF;
+}
+
+.navbar .nav > li > a:hover {
+    margin-top: 9px;
+    padding-left: 9px;
+    padding-right: 9px;
+    margin-bottom: 10px;
+    padding-top: 0px;    
+    padding-bottom: 0px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, .5);
+}
+
+.container .navbar {
+/*    height: 100px; */
+/*    background-color: #FF7500; */
+}
+
+.navbar {
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: -20px;
+    margin-top: 20px;
+}
+
+.navbar-inner {
+    min-height: 100px;
+    position: relative;
+    background-image: -moz-linear-gradient(top, #FF5000, #FF7500);
+    background-image: -ms-linear-gradient(top, #FF7700, #FF7500);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF7700), to(#FF7500));
+    background-image: -webkit-linear-gradient(top, #FF8500, #FF7500);
+    background-image: -o-linear-gradient(top, #FF7700, #FF7500);
+    background-image: linear-gradient(top, #FF7700, #FF7500);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF7700', endColorstr='#FF7500', GradientType=0);
+    -webkit-border-radius: 4px 4px 0px 0px;
+    -moz-border-radius: 4px 4px 0px 0px;
+    border-radius: 4px 4px 0px 0px;
+}
+
+.navbar-inner .container {
+    background: url('../img/mountains.png') right no-repeat;
+}
+
+.btn-navbar:hover,
+.btn-navbar:active,
+.btn-navbar.active,
+.btn-navbar.disabled,
+.btn-navbar[disabled] {
+  background-color: #FF7500;
+}
+
+.btn-navbar {
+    background-color: #FF7500;
+    background-image: -moz-linear-gradient(top, #FF5000, #FF7500);
+    background-image: -ms-linear-gradient(top, #FF7700, #FF7500);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF7700), to(#FF7500));
+    background-image: -webkit-linear-gradient(top, #FF8500, #FF7500);
+    background-image: -o-linear-gradient(top, #FF7700, #FF7500);
+    background-image: linear-gradient(top, #FF7700, #FF7500);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF7700', endColorstr='#FF7500', GradientType=0);
+}
+
+.navbar-inner .container {
+    padding-top: 50px;
+} 
+
+.container .content {
+    margin-top: 20px;
+}
+
+@media (max-width: 480) {
+    .navbar-inner .container {
+        width: 440px;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 767) {
+    .navbar-inner .container {
+        width: 440px;
+    }
+}
+
+@media (max-width: 768) {
+    .navbar-inner .container {
+        width: 730px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 979px) {
+    .navbar-inner .container {
+        width: 730px;
+    }
+}
+
+@media (min-width: 980px) {
+    .navbar-inner .container {
+        width: 950px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .navbar-inner .container {
+        width: 1175px;
+    }
+}
+
+
+
+.table {
+    margin-bottom: 1px;
+}
+
+.form-horizontal .help-block {
+    margin-top: 3px;
+}
+
+table .headerSortUp, table .headerSortDown {
+  background-color: rgba(141, 192, 219, 0.25);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+
+}
+
+table .headerSortDown {
+  background-image: url(../img/sort_dsc.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+}
+
+table .headerSortUp {
+  background-image: url(../img/sort_asc.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+}
+
+table .header:hover {
+  background-image: url(../img/sort.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+  cursor: pointer;
+}
+
+div.page-header {
+    margin-top: 0px;
+    margin-bottom: 17px;
+    padding-bottom: 0px;
+}
+
+div.controls ul {
+    margin-left: 0px;
+    margin-top: 3px;
+}
+
+div.controls ul li {
+    list-style: none;
+    margin-left: 0px;
+}
+
+.content {
+    background-color: #fff;
+    padding: 20px;
+    padding-top: 10px;
+    margin: 0 -20px; 
+    -webkit-border-radius: 0 0 6px 6px;
+    -moz-border-radius: 0 0 6px 6px;
+    border-radius: 0 0 6px 6px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+
+.form-errors li {
+    list-style: none;
+}
+
+ul.errorlist {
+    margin-left: 0px;
+    margin-bottom: 0px;
+}
+
+#login-form {
+    padding-left: 0px;
+}
+
+.list-view-search fieldset {
+    padding-top: 0px;
+    margin-bottom: 0px;
+}
+
+.field-errors ul {
+    display: inline;
+}
+
+.field-errors li {
+    list-style: none;
+    color: #9D261D;
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+form div.clearfix.form-field.error {
+    margin-bottom: 12px;
+}
+
+input, textarea, select, .uneditable-input {
+    width: 500px;
+}
+
+.help-inline, .help-block {
+    color: #999;
+}
+
+.buttons {
+    margin-bottom: 5px;
+}
+
+.pagination {
+    margin: 0px;
+}
+
+.pagination-text {
+    margin-top: 9px;
+}
+
+tr.inactive td {
+    color: #ccc;
+}
+
+tr.inactive td a {
+    color: #ccc;
+}
+
+.image-picker table td {
+    border: 0px;
+    padding: 0px;
+    vertical-align: bottom;
+}
+
+.image-picker table {
+    border: 0px;
+    margin-bottom: 0px;
+}
+
+.input ul li {
+    display: inline-block;
+}
+
+.input ul li label {
+    text-align: left;
+    padding-right: 10px;
+}
+
+.input ul {
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+fieldset {
+    padding-top: 0px;
+}
+
+fieldset.field-group legend {
+    background: white;
+    float: left;
+    margin: -25px 0 15px 140px;
+    padding: 0 10px;
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 1;
+    color: #333;
+}
+
+fieldset.field-group {
+    margin: 20px -20px -10px 0;
+    padding: 13px 20px 5px 0;
+    border-top: 1px solid #DDD;
+}
+
+fieldset.field-group div.form-field {
+    clear: both;
+}

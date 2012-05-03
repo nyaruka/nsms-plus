@@ -1,4 +1,16 @@
+*.db
 *.log
 *.pot
 *.pyc
+*.DS_Store
 local_settings.py
+config/gen/*
+env/
+build/
+dist/
+
+/nsms_plus.egg-info/PKG-INFO
+/nsms_plus.egg-info/SOURCES.txt
+/nsms_plus.egg-info/dependency_links.txt
+/nsms_plus.egg-info/not-zip-safe
+/nsms_plus.egg-info/top_level.txt

@@ -1,0 +1,6 @@
+include README.md
+recursive-include nsms_plus/static *
+recursive-include nsms_plus/templates *
+recursive-include nsms_plus/templatetags *
+recursive-include nsms_plus/management *
+prune proj
