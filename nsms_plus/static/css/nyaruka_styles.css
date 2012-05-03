@@ -48,7 +48,7 @@ html, body {
 }
 
 .navbar-inner .container {
-    background: url('../img/mountains.png') right no-repeat;
+    background: url('../img/mountains.png') 97.5% no-repeat;
 }
 
 .btn-navbar:hover,
@@ -61,14 +61,14 @@ html, body {
 
 .btn-navbar {
     background-color: #FF7500;
-    background-image: -moz-linear-gradient(top, #FF5000, #FF7500);
-    background-image: -ms-linear-gradient(top, #FF7700, #FF7500);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF7700), to(#FF7500));
+    background-image: -moz-linear-gradient(top, #FF8500, #FF7500);
+    background-image: -ms-linear-gradient(top, #FF8500, #FF7500);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF8500), to(#FF7500));
     background-image: -webkit-linear-gradient(top, #FF8500, #FF7500);
-    background-image: -o-linear-gradient(top, #FF7700, #FF7500);
-    background-image: linear-gradient(top, #FF7700, #FF7500);
+    background-image: -o-linear-gradient(top, #FF8500, #FF7500);
+    background-image: linear-gradient(top, #FF8500, #FF7500);
     background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF7700', endColorstr='#FF7500', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF8500', endColorstr='#FF7500', GradientType=0);
 }
 
 .navbar-inner .container {
