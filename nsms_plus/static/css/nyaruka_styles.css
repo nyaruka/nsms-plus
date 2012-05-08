@@ -291,3 +291,13 @@ fieldset.field-group {
 fieldset.field-group div.form-field {
     clear: both;
 }
+
+#zoomed_chart {
+    height:100%;
+    width:100%;
+}
+
+#zoom_modal {
+    width:90%;
+    margin-left:-45%;
+}

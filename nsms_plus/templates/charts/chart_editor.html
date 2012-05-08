@@ -1,0 +1,599 @@
+{% extends "base.html" %}
+
+{% block extra-style %}
+ <style>
+     .chart_cfg {
+         margin:2px;
+         height:20px;
+         font-size: 12px;
+         color: #555;
+         width:42%;
+     }
+
+     .chart_label {
+         float: left;
+         margin-right:10px;
+         font-size: 14px;
+         width: 100px;
+         text-align: right;
+         margin-top:5px;
+     }
+
+     .series_label {
+         width:100px;
+         float: left;
+         margin-right:10px;
+         font-size: 14px;
+         text-align: right;
+         margin-top:5px;
+     }
+
+     .chart_input, .series_input {
+         width: 300px;
+     }
+
+     .well {
+         padding: 8px;
+         margin-bottom: 6px;
+     }
+
+     .metric_widget {
+
+     }
+     
+     .filter_summary {
+         margin: 0 18px;
+         color: #888;
+         font-size:11px;
+     }
+
+     .agg_select {
+         width:20%;
+         font-size:11px;
+     }
+
+     .type_select {
+         width:20%;
+         font-size:11px;
+     }
+
+     #chart_container {
+         width:100%;
+         height:350px;
+     }
+
+     .remove_button, .toggle_axis {
+         vertical-align: bottom;
+         margin-bottom:5px;
+         margin-right:3px;
+     }
+
+     .chart_btn {
+         padding:4px;
+         margin-top:7px;
+         clear: both;
+         font-weight:bold;
+         font-size:11px;
+     }
+
+     .picker {
+         width:8px;
+         height:8px;
+         margin: 0 2px;
+         border: 1px solid #777;
+         -moz-border-radius: 3px;
+         border-radius: 3px;
+         cursor:pointer;
+     }
+
+     .right {
+         text-align: right;
+     }
+
+ </style>
+{% endblock %}
+
+{% block extra-script %}
+<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/jscolor/jscolor.js"></script>
+<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/highcharts.js"></script>
+<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/charts.js"></script>
+
+<script>
+
+    var CHART_TYPES = ["spline", "areaspline", "column", "line", "area" ];
+
+    Array.remove = function(array, from, to) {
+        var rest = array.slice((to || from) + 1 || array.length);
+        array.length = from < 0 ? array.length + from : from;
+        return array.push.apply(array, rest);
+    };
+
+    var all_metrics = {{metrics|safe}};
+    var all_aggregates = {{aggregates|safe}};
+    var all_filters = {{filters_json|safe}};
+
+    {% if chart %}
+        var chart = {{chart|safe}};
+    {% else %}
+        var chart = {
+            interval: '{{intervals|first}}',
+            dataset: '{{dataset}}',
+            labels: {
+                title: 'My Chart',
+                subtitle: '',
+                x: '{{intervals|first|capfirst}}',
+                y: '',
+                y2: ''
+            },
+            options: {
+                stacked: null
+            },
+            metrics : []
+        };
+    {% endif %}
+
+    function show_chart_settings(chart) {
+
+        $("#title").val(chart.labels.title);
+        $("#subtitle").val(chart.labels.subtitle);
+        $("#x_label").val(chart.labels.x);
+        $("#y_label").val(chart.labels.y);
+        $("#y2_label").val(chart.labels.y2);
+
+        if (chart.options.stacked == null) {
+            $('#btn_none').button('toggle');
+        } else if (chart.options.stacked == "normal") {
+            $('#btn_normal').button('toggle');
+        } else if (chart.options.stacked == "percent") {
+            $('#btn_percentage').button('toggle');
+        }
+
+        $("#btn_" + chart.interval).button('toggle');
+        $('#chart_settings_modal').modal();
+    }
+
+    function edit_series_settings(idx) {
+        show_series_settings(chart, idx);
+    }
+
+    function show_series_settings(chart, idx) {
+        var metric = chart.metrics[idx];
+        $("#series_label").val(metric.label);
+        $("#series_modal").attr("name", idx);
+        $("#send_to_back").attr("checked", false);
+
+        // select the first values as the default
+        $(".filter_value_0").each(function() {
+            $(this).attr("selected", true);
+        });
+
+        // select any filters set on our series
+        if (metric.filters) {
+            for (var i in metric.filters) {
+                var filter = metric.filters[i];
+                var select = $("#" + filter.field);
+                select.children("option[value=" + filter.value + "]").each(function () {
+                    $(this).attr("selected", true);
+                });
+            }
+        }
+
+        $("#series_modal").modal();
+    }
+
+    function update_series() {
+        var idx = parseInt($("#series_modal").attr("name"));
+        var metric = chart.metrics[idx];
+
+        metric.label = $("#series_label").val();
+
+        // send to the back if necessary
+        if (idx > 0 && $("#send_to_back").attr("checked")) {
+            Array.remove(chart.metrics, idx, idx);
+            chart.metrics.unshift(metric);
+        }
+
+        // save our fitlers settings
+        var filters = [];
+        $(".filter_select").each(function() {
+            var selected = $(this).children("option:selected")[0];
+            if (selected.value) {
+                filters[filters.length] = ({ field: $(this).attr("id"), value: selected.value });
+            }
+        });
+
+        var changed = JSON.stringify(metric.filters) != JSON.stringify(filters);
+
+        if (changed) {
+            metric.filters = filters;
+            metric.series = null;
+            fetch_data(chart, metric, render);
+            generate_form();
+        } else {
+            generate_form();
+            render();
+        }
+
+        $("#series_modal").modal('hide');
+
+    }
+
+    function save() {
+        chart.highchart = null;
+        $("#chart_spec").val(JSON.stringify(chart));
+        $("form").submit();
+    }
+
+    function remove_series() {
+        var idx = parseInt($("#series_modal").attr("name"));
+        Array.remove(chart.metrics, idx);
+        $("#series_modal").modal('hide');
+        generate_form();
+        render();
+    }
+
+    function render() {
+        render_chart(chart, "chart_container", { manual_fetching:true, check_fetched:true, show_legend:true, click_chart:show_chart_settings, click_series:show_series_settings});
+    }
+
+    function add_metric(left) {
+        var new_metric = {
+            name: all_metrics[0].name,
+            label: all_metrics[0].label + " (sum)",
+            agg: 'sum',
+            left: left,
+            type: 'spline'
+        };
+
+        chart.metrics[chart.metrics.length] = new_metric;
+
+        // if it's our first one, set some details
+        //if (chart.metrics.length == 1) {
+        //    chart.labels.title = all_metrics[0].label;
+            // chart.labels.subtitle = 'Total ' + chart.labels.title + " over last few {{interval}}";
+        //}
+
+        fetch_data(chart, new_metric, render);
+        generate_form();
+    }
+
+
+
+
+    function generate_form() {
+        var left = "";
+        var right = "";
+
+        for (var i=0; i<chart.metrics.length; i++) {
+            var metric = chart.metrics[i];
+            if (metric.left) {
+                left += generate_metric_widget(metric, i);
+            } else {
+                right += generate_metric_widget(metric, i);
+            }
+        }
+
+        var left_form = $("#left_form");
+        left_form.empty();
+        left_form.append(left);
+
+        var right_form = $("#right_form");
+        right_form.empty();
+        right_form.append(right);
+
+        $(".picker").each(function() {
+            var picker = new jscolor.color(this, { onImmediateChange: color_changed });
+            picker.fromString($(this).val());
+        });
+    }
+
+    function generate_metric_widget(metric, idx) {
+
+        var edit_link = "<a href='javascript:edit_series_settings(" + idx + ");'>";
+
+        var widget = "<div class='well metric_widget " + ((metric.left) ? "" : "right") + "'>";
+
+        if (metric.left) {
+            widget += edit_link + "<i class='icon-cog' ></i></a>";
+        } else {
+            widget += "<a href='javascript:toggle_axis(" + idx + ");'><img class='toggle_axis' src='{{STATIC_URL}}/img/out.png'/></a>";
+        }
+
+        widget += "<select name='" + idx + "' class='chart_cfg metric_select'>";
+        for (var i=0; i<all_metrics.length; i++) {
+            var checked = all_metrics[i].name == metric.name ? " selected" : "";
+            widget += "<option value='" + i + "' "+ checked +">" + all_metrics[i].label + "</option>";
+        }
+        widget += "</select>";
+
+
+        widget += "<select name='" + idx + "'  class='chart_cfg agg_select'>";
+        for (var i=0; i<all_aggregates.length; i++) {
+            var checked = all_aggregates[i].fn == metric.agg ? " selected" : "";
+            widget += "<option value='" + all_aggregates[i].fn + "'"+ checked +">" + all_aggregates[i].name + "</option>";
+        }
+        widget += "</select>";
+
+        var color = metric.color;
+        if (color == null) {
+            color = colors[idx % colors.length];
+        }
+
+        // Add color picker
+        widget += "<input name='" + idx + "' class='picker' value='" + color + "'/>";
+
+        // chart types
+        widget += "<select class='chart_cfg type_select' name='" + idx + "'>";
+        for (var i in CHART_TYPES) {
+            var selected = metric.type == CHART_TYPES[i] ? " selected" : "";
+            widget += "<option" + selected + ">" + CHART_TYPES[i] + "</option>";
+        }
+        widget += "</select>";
+
+        if (!metric.left) {
+            widget += edit_link + "<i class='icon-cog' ></i></a>";
+        } else {
+            widget += "<a href='javascript:toggle_axis(" + idx + ");'><img class='toggle_axis' src='{{STATIC_URL}}/img/in.png'/></a>";
+        }
+
+
+        if (metric.filters && metric.filters.length > 0) {
+        widget += "<div class='filter_summary'><strong>Filters:</strong> ";
+        var delim = "";
+        for (var i in metric.filters) {
+            var filter = metric.filters[i];
+            var filter_spec = all_filters[filter.field];
+            var value_name = null;
+
+            for (var j in filter_spec.options) {
+                var option = filter_spec.options[j];
+                if (option[0] == filter.value) {
+                    value_name = option[1];
+                    break;
+                }
+            }
+
+            if (value_name) {
+                widget += delim + value_name;
+                delim = ", ";
+            }
+        }
+        widget += "</div>";
+        }
+
+        widget += "</div>";
+        return widget;
+    }
+
+    function save_chart_settings() {
+        chart.labels.title = $("#title").val();
+        chart.labels.subtitle = $("#subtitle").val();
+        chart.labels.x = $("#x_label").val();
+        chart.labels.y = $("#y_label").val();
+        chart.labels.y2 = $("#y2_label").val();
+
+        // make sure there is at least a title so
+        // there is something to click on
+        if (!chart.labels.title) {
+            chart.labels.title = "My Chart";
+        }
+
+        var stacked = $("#stack_buttons").children(".active").text().toLowerCase();
+        if (stacked == "none") {
+            chart.options.stacked = null;
+        } else {
+            chart.options.stacked = stacked;
+        }
+
+        $('#chart_settings_modal').modal('hide');
+
+        var interval = $("#interval_buttons").children(".active").text().toLowerCase();
+        if (interval != chart.interval) {
+            chart.labels.x = interval.charAt(0).toUpperCase() + interval.slice(1);
+            chart.interval = interval;
+            for (var i in chart.metrics) {
+                chart.metrics[i].series = null;
+                fetch_data(chart, chart.metrics[i], render);
+            }
+        } else {
+            render();
+        }
+    }
+
+
+    /** series selection options **/
+
+    $('.metric_select').live('change', function(){
+        var metric = chart.metrics[this.name];
+        var idx = get_selected_option($(this)).val();
+        metric.name = all_metrics[idx].name;
+        metric.label = all_metrics[idx].label + " (" + metric.agg + ")";
+        metric.series = null;
+        fetch_data(chart, metric, render);
+    });
+
+    $('.agg_select').live('change', function(){
+        var metric = chart.metrics[this.name];
+        metric.agg = get_selected_option($(this)).val();
+
+        var idx = get_selected_option($(".metric_select")).val();
+        metric.label = all_metrics[idx].label + " (" + metric.agg + ")";
+        metric.series = null;
+        fetch_data(chart, metric, render);
+    });
+
+    $('.type_select').live('change', function(){
+        var metric = chart.metrics[this.name];
+        metric.type = get_selected_option($(this)).val();
+        fetch_data(chart, metric, render);
+    });
+
+    /**
+     * Update the color for a given metric
+     */
+    function color_changed(color) {
+        if (color) {
+            var rgb = color.rgb;
+            var metric =chart.metrics[$(color.valueElement).attr("name")];
+            metric.color = "#" + RGBtoHex(parseInt(255*rgb[0]), parseInt(255*rgb[1]), parseInt(255*rgb[2]));
+            render();
+        }
+    }
+
+    /**
+     * Switch the side a series is plotted against
+     */
+    function toggle_axis(idx) {
+        chart.metrics[idx].left = !chart.metrics[idx].left;
+        generate_form();
+        render();
+    }
+
+    /**
+     * Get the selected option value
+     */
+    function get_selected_option(select) {
+        var option = null;
+        select.children("option:selected").each(function () {
+            option = $(this);
+        });
+        return option;
+    }
+
+    // Select the first label field when our modals are shown
+    $('#series_modal').on('shown', function() { $('#series_label').select(); });
+    $('#chart_settings_modal').on('shown', function() { $('#title').select(); });
+
+    // Save our modals when the enter key is pressed
+    $(".chart_input").keyup(function(event){ if(event.keyCode == 13){ save_chart_settings(); }});
+    $(".series_input").keyup(function(event){ if(event.keyCode == 13){ update_series(); }});
+
+    // popover help texts for the stacked charts
+    $('#btn_normal').popover({title:"Stacked Charts", placement:'bottom', content:'Stacked charts are mostly useful when plotting by area or column. If stacking is enabled, all plotted elements on the same axis with the same chart type will be stacked on top of each other.'});
+    $('#btn_percentage').popover({title:"Stacking by Percentage", placement:'bottom', content:'Stacking by percentage stacks all plotted elements on the same axis together with their total made to equal 100% on the scale.'});
+
+
+    // render our chart or add a new metric if there isn't one yet
+    $(document).ready(function() {
+        if (chart.metrics.length == 0) {
+            add_metric(true);
+        } else {
+            for (var i in chart.metrics) {
+                fetch_data(chart, chart.metrics[i], render);
+            }
+        }
+        generate_form();
+    });
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+<div style="display:none" class="modal" id="chart_settings_modal">
+    <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3>Chart Settings</h3>
+    </div>
+    <div class="modal-body">
+        <div class="chart_label">Title</div><input class="chart_input" id="title" type="text" name="name" value="" maxlength="64" />
+        <div class="chart_label">Subtitle</div><input class="chart_input" id="subtitle" type="text" name="name" value="" maxlength="64" />
+        <hr/>
+        <div class="chart_label">Bottom (x-axis)</div><input class="chart_input" id="x_label" type="text" name="name" value="" maxlength="64" />
+        <div class="chart_label">Left (y-axis)</div><input class="chart_input" id="y_label" type="text" name="name" value="" maxlength="64" />
+        <div class="chart_label">Right (y-axis)</div><input class="chart_input" id="y2_label" type="text" name="name" value="" maxlength="64" />
+        <hr/>
+
+        <div class="chart_label">Interval</div>
+        <div id="interval_buttons" class="btn-group" data-toggle="buttons-radio">
+            {% for interval in intervals %}
+            <button id="btn_{{interval}}" class="btn">{{interval|capfirst}}</button>
+            {% endfor %}
+        </div>
+        <br/>
+
+
+        <div class="chart_label">Stacking</div><div id="stack_buttons" class="btn-group" data-toggle="buttons-radio">
+            <button id="btn_none" class="btn">None</button>
+            <button id="btn_normal" class="btn">Normal</button>
+            <button id="btn_percentage" class="btn">Percent</button>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <a href="javascript:save_chart_settings();" class="btn btn-primary">Done</a>
+    </div>
+</div>
+
+<div style="display:none" class="modal" id="series_modal">
+    <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3>Edit Series</h3>
+    </div>
+    <div class="modal-body">
+        <p>Select an appropriate name to use for the series of data. The chosen name will appear in the chart and also in the legend.</p>
+        <div class="series_label">Label</div><input class="series_input" id="series_label" type="text" name="name" value="" maxlength="64" />
+        <br/>
+        <div class="series_label">&nbsp;</div>
+        <input type="checkbox" id="send_to_back"> Send to back<br clear="both"/>
+
+        {% if filters %}
+        <br clear="both"/>
+        <h3>Filters</h3>
+        <p>Select from the filter options below to restrict the data for this series.</p>
+        {% for filter_name, filter in filters.items %}
+        <div class="series_label"> {{filter.label}}</div>
+        <select id={{filter_name}} class="series_input filter_select">
+            {% for val, name in filter.options %}
+            <option class='filter_value_{{forloop.counter0}}' value="{{val}}">{{name}}</option>
+            {% endfor %}
+        </select>
+        <br clear="both"/>
+        {% endfor %}
+        {% endif %}
+
+    </div>
+    <div class="modal-footer">
+
+        <a href="javascript:remove_series();" class="btn btn-danger"><i class="icon-remove icon-white"></i> Remove</a><a href="javascript:update_series();" class="btn btn-primary">Update</a>
+    </div>
+</div>
+
+        <div id="chart_container">
+
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <hr/>
+            <div class="row">
+                <div class="span6">
+                    <div id="left_form"></div>
+                    &nbsp;
+                </div>
+                <div class="span6">
+                    <div id="right_form"></div>
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="span6">
+                    <a class="btn btn-mini primary pull-left" href="javascript:add_metric(true);">Add to Left</a>
+                </div>
+                <div class="span6">
+                    <a class="btn btn-mini primary pull-right" href="javascript:add_metric(false);">Add to Right</a>
+                </div>
+            </div>
+
+            <hr/>
+
+            <br clear="both"/>
+            <input id="chart_spec" type="hidden" name="chart_spec" value=""/>
+            {% if chart %}
+            <a href="javascript:save()" class="btn btn-primary">Save Chart</a>
+            {% else %}
+            <a href="javascript:save()" class="btn btn-primary">Create Chart</a>
+            {% endif %}
+        </form>
+
+{% endblock %}
