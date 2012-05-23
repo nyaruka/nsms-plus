@@ -199,7 +199,7 @@ class ChartCRUDL(SmartCRUDL):
                 # date_format = '%a, %h %d'
                 date_format = '%h %d'
             elif interval == 'months':
-                date_format = '%h'
+                date_format = '%h %Y'
             elif interval == 'years':
                 date_format = '%Y'
 
