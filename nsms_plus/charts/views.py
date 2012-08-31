@@ -127,7 +127,16 @@ class ChartCRUDL(SmartCRUDL):
             return HttpResponseRedirect(reverse("dashboard"))
 
     class Detail(SmartListView):
-        link_fields = ('',)
+        link_fields = []
+
+        def get_stat_class_method(self, name):
+            cl = self.request.REQUEST['dataset']
+            d = cl.rfind(".")
+            classname = cl[d+1:len(cl)]
+            m = __import__(cl[0:d], globals(), locals(), [classname])
+            clazz = getattr(m, classname)
+            return getattr(clazz, name, None)
+
         def derive_title(self):
             model_class = self.request.REQUEST['dataset']
             model_cfg = Chart.get_model_config(model_class)
@@ -135,8 +144,35 @@ class ChartCRUDL(SmartCRUDL):
 
         def derive_fields(self):
             model_class = self.request.REQUEST['dataset']
-            fields = [Chart.get_model_config(model_class)['date_field'], self.request.REQUEST['metric']]
+            metric = self.request.REQUEST['metric']
+
+            custom_field_method = self.get_stat_class_method('get_detail_fields')
+            if custom_field_method:
+                fields = custom_field_method(metric)
+            else:
+                fields = [Chart.get_model_config(model_class)['date_field'], self.request.REQUEST['metric']]
+
             return fields
+
+        def lookup_field_link(self, context, field, obj):
+            model_class = self.request.REQUEST['dataset']
+            metric = self.request.REQUEST['metric']
+
+            custom_url_method = self.get_stat_class_method('get_link_url')
+            if custom_url_method:
+                return custom_url_method(metric, obj, field)
+            else:
+                return None
+
+        def derive_link_fields(self, context):
+            model_class = self.request.REQUEST['dataset']
+            metric = self.request.REQUEST['metric']
+
+            custom_link_method = self.get_stat_class_method('get_link_fields')            
+            if custom_link_method:
+                return custom_link_method(metric)
+            else:
+                return []
 
         def get_queryset(self, **kwargs):
             model_class = self.request.REQUEST['dataset']
@@ -156,11 +192,15 @@ class ChartCRUDL(SmartCRUDL):
             # filter by our time series bucket
             time_series = Chart.get_series_data(model_class, metric, interval, None, filters)
             (start, rollup) = time_series[bucket]
-
             end = start + relativedelta(**{interval:1})
-            date_field = model_cfg['date_field']
-            qs = qs.filter(**{ '%s__gte' % date_field : start, '%s__lt' % date_field : end })
-            return qs
+
+            custom_item_method = self.get_stat_class_method('get_detail_items')
+            if custom_item_method:
+                return custom_item_method(metric, start, end, filters)
+            else:
+                date_field = model_cfg['date_field']
+                qs = qs.filter(**{ '%s__gte' % date_field : start, '%s__lt' % date_field : end })
+                return qs
 
     class Series(SmartView, TemplateView):
 
