@@ -158,7 +158,7 @@ class ChartCRUDL(SmartCRUDL):
             model_class = self.request.REQUEST['dataset']
             metric = self.request.REQUEST['metric']
 
-            custom_url_method = self.get_stat_class_method('get_link_url')
+            custom_url_method = self.get_stat_class_method('get_detail_link_url')
             if custom_url_method:
                 return custom_url_method(metric, obj, field)
             else:
@@ -168,7 +168,7 @@ class ChartCRUDL(SmartCRUDL):
             model_class = self.request.REQUEST['dataset']
             metric = self.request.REQUEST['metric']
 
-            custom_link_method = self.get_stat_class_method('get_link_fields')            
+            custom_link_method = self.get_stat_class_method('get_detail_link_fields')            
             if custom_link_method:
                 return custom_link_method(metric)
             else:
