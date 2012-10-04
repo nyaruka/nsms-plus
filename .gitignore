@@ -8,6 +8,7 @@ config/gen/*
 env/
 build/
 dist/
+*~
 
 /nsms_plus.egg-info/PKG-INFO
 /nsms_plus.egg-info/SOURCES.txt
