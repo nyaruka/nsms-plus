@@ -2,7 +2,10 @@
 
 {% block table-buttons %}
 {% if perms.rapidsms_httprouter.message_csv %}
-<a class="btn pull-right" href="{% url console.message_csv %}">Export</a>
+<a style="margin-left: 5px" class="btn pull-right" href="{% url console.message_csv %}">Export</a>
+{% endif %}
+{% if perms.rapidsms_httprouter.message_monthly %}
+<a class="btn pull-right" href="{% url console.message_monthly %}">Monthly Usage</a>
 {% endif %}
 {% endblock table-buttons %}
 

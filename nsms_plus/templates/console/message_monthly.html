@@ -1,0 +1,120 @@
+{% extends "smartmin/list.html" %}
+
+{% load humanize %}
+
+{% block pre-content %}
+<div class="page-header"><h2>Montly Message Usage</h2></div>
+<div id="message_activity" style="min-width: 700px; height: 160px; margin: 0 auto"></div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="span12">
+    <table class="table table-striped table-bordered">
+      <thead>
+	<tr>
+	  <th>Month</th>
+	  <th class="count">Incoming Messages</th>
+	  <th class="count">Outgoing Messages</th>
+	  <th class="count">Total</th>
+	</tr>
+      </thead>
+
+      {% for count in counts %}
+      <tr>
+	<td>{{ count.start|date:"F Y" }}</td>
+	<td class="count">{{ count.incoming|intcomma }}</td>
+	<td class="count">{{ count.outgoing|intcomma }}</td>
+	<td class="count">{{ count.total|intcomma }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra-script %}
+<script>
+  $(function () {
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'message_activity',
+                type: 'column'
+            },
+            colors: [
+                '#4572A7', 
+         	'#89A54E', 
+            ],
+            credits: {
+                 enabled: false
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                type: 'datetime',
+                tickInterval: 24 * 3600 * 1000 * 30,
+                dateTimeLabelFormats: { 
+                    day: '%b',
+                    week: '%b',
+                    month: '%b',
+                    year: '%b'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            yAxis: {
+                title: {
+                     text: 'Messages'
+                },
+                min: 0
+            },
+            tooltip: {
+                formatter: function() {
+                    return '<b>'+ this.series.name +'</b><br/>' + 
+                        Highcharts.dateFormat('%B', this.x) +' - '+ this.y;
+                }
+            },
+            
+            series: [
+                {
+                stacking: 'normal',
+                name: 'Incoming',
+                data: [
+                    {% for count in incoming_counts %}
+                    [Date.UTC( {{ count.created.year }},  {{ count.created.month}}-1 , {{ count.created.day }} ), {{ count.created_on_count }}  ]
+                    {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+                }
+                ,
+                
+                {
+                stacking: 'normal',
+                name: 'Outgoing',
+                data: [
+                    {% for count in outgoing_counts %}
+                    [Date.UTC( {{ count.created.year }},  {{ count.created.month}}-1 , {{ count.created.day }} ), {{ count.created_on_count }}  ]
+                    {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+                }
+            ]
+        });
+    });
+  });
+</script>
+{% endblock %}
+
+{% block extra-style %}
+{{ block.super }}
+<style>
+  th.count, td.count {
+    text-align: right;
+    width: 200px;
+  }
+</style>
+{% endblock %}
