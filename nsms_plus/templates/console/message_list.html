@@ -14,20 +14,33 @@
 <div id="message_activity" style="min-width: 700px; height: 160px; margin: 0 auto"></div>
 {% endblock %}
 
+{% block pjax %}
+{{ block.super }}
+<script>
+$("td.value-number").click(function(){
+  $("input.search-query").val($(this).text().trim());
+  $("form.form-search").submit();
+});
+</script>
+{% endblock %}
+
+
 {% block post-content %}
+{% load smartmin %}
+
 <div class="row" style="padding-top: 10px">
   <div class="span12">
     <div class="well" style="padding-bottom: 0px; padding-top: 0px;">
       <table class="table">
 	<tr class="first">
-	  <td width="10"><div class="cin">&nbsp;</div></td><td width="120">Incoming test message</td>
-	  <td width="10"><div class="in">&nbsp;</div></td><td width="120">Incoming message</td>
-	  <td width="10"><div class="queued">&nbsp;</div></td><td width="120">Outgoing message still unsent</td>
+	  <td width="10"><div class="direction cin">&nbsp;</div></td><td width="120">Incoming test message</td>
+	  <td width="10"><div class="direction in">&nbsp;</div></td><td width="120">Incoming message</td>
+	  <td width="10"><div class="direction queued">&nbsp;</div></td><td width="120">Outgoing message still unsent</td>
 	</tr>
 	<tr>
-	  <td><div class="cout">&nbsp;</div></td><td>Outgoing test message</td>
-	  <td><div class="delivered">&nbsp;</div></td><td>Outgoing message delivered</td>
-	  <td><div class="sent">&nbsp;</div></td><td>Outgoing message sent</td>
+	  <td><div class="direction cout">&nbsp;</div></td><td>Outgoing test message</td>
+	  <td><div class="direction delivered">&nbsp;</div></td><td>Outgoing message delivered</td>
+	  <td><div class="direction sent">&nbsp;</div></td><td>Outgoing message sent</td>
 	</tr>
       </table>
     </div>
@@ -70,61 +83,68 @@
     border-top: 0px;
   }
 
-  #pjax table tbody tr td +td +td +td {
-      width: 120px;
+  td.value-date {
+      width: 130px;
       text-align: right;
+      white-space: nowrap;
   }
 
-  #pjax table tbody tr th +th +th +th {
-      width: 120px;
-      text-align: right;
+  td.value-direction {
+    width: 18px;
+    text-align: center;
   }
 
-  div.in {
+  td.value-number {
+    width: 100px;
+  }
+
+  td.value-direction div {
       width: 10px;
       height: 15px;
       background-repeat: no-repeat;
+      margin: auto;
+  }
+
+  div.direction {
+      width: 10px;
+      height: 15px;
+      background-repeat: no-repeat;
+      margin: auto;
+  }
+
+  div.in {
       background-image: url("{{ STATIC_URL }}console/in.png");
   }
 
   div.delivered {
-      width: 10px;
-      height: 15px;
-      background-repeat: no-repeat;
       background-image: url("{{ STATIC_URL }}console/delivered.png");
   }
 
   div.sent {
-      width: 10px;
-      height: 15px;
-      background-repeat: no-repeat;
       background-image: url("{{ STATIC_URL }}console/sent.png");
   }
 
   div.queued {
-      width: 10px;
-      height: 15px;
-      background-repeat: no-repeat;
       background-image: url("{{ STATIC_URL }}console/queued.png");
   }
 
   div.cin {
-      width: 10px;
-      height: 15px;
-      background-repeat: no-repeat;
       background-image: url("{{ STATIC_URL }}console/cin.png");
   }
 
   div.cout {
-      width: 10px;
-      height: 15px;
-      background-repeat: no-repeat;
       background-image: url("{{ STATIC_URL }}console/cout.png");
+  }
+
+  td.value-number:hover {
+      cursor: pointer;
   }
 </style>
 {% endblock %}
 
 {% block extra-script %}
+{{ block.super }}
+<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/highcharts.js"></script>
 <script>
   $(function () {
     var chart;
