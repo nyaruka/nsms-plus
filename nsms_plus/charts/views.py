@@ -36,7 +36,7 @@ class ChartCRUDL(SmartCRUDL):
         title = "Select Dataset"
         form_class = ChartForm
         def get_success_url(self):
-            return "%s?dataset=%s" % (reverse('dashboard.chart_editor'), self.form.cleaned_data['dataset'])
+            return "%s?dataset=%s" % (reverse('charts.chart_editor'), self.form.cleaned_data['dataset'])
 
     class Editor(SmartView, TemplateView):
         def pre_process(self, request, *args, **kwargs):
