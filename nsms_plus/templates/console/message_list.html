@@ -1,5 +1,18 @@
 {% extends "smartmin/list.html" %}
 
+{% block search-form %}
+<form class="form-search">
+  <select name="backend_id" class="backends"> 
+    <option value="0" {% if not backend_id %}selected{% endif %}>All</option>
+    {% for backend in backends %}
+    <option value="{{ backend.id }}" {% if backend_id == backend.id %}selected{% endif %}>{{ backend.name }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" class="input-medium search-query" name="search" value="{{ search }}">
+  <button type="submit" class="btn">Search</button>
+</form>
+{% endblock %}
+
 {% block table-buttons %}
 {% if perms.rapidsms_httprouter.message_csv %}
 <a style="margin-left: 5px" class="btn pull-right" href="{% url console.message_csv %}">Export</a>
@@ -138,6 +151,10 @@ $("td.value-number").click(function(){
 
   td.value-number:hover {
       cursor: pointer;
+  }
+
+  .backends {
+    width: 200px;
   }
 </style>
 {% endblock %}
