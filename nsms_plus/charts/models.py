@@ -21,7 +21,7 @@ STACK_CHOICES = (
     ('percent', 'Percent'),
 )
 
-DATA_POINTS = 10
+DATA_POINTS = 11
 AGGREGATES = dict(avg=Avg, sum=Sum, count=Count, max=Max, min=Min)
 
 class Report(SmartModel):
