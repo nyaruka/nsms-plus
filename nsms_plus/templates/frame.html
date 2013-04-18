@@ -53,19 +53,19 @@
           <div class="nav-collapse">
             <ul class="nav">
               {% if perms.healthcenters.healthcenter_list %}
-              <li><a href="{% url healthcenters.healthcenter_list %}">Health Centers</a></li>
+              <li><a href="{% url 'healthcenters.healthcenter_list' %}">Health Centers</a></li>
               {% endif %}
               
               {% if perms.malaria.malariareport_list %}
-              <li><a href="{% url malaria.malariareport_list %}">Messages</a></li>
+              <li><a href="{% url 'malaria.malariareport_list' %}">Messages</a></li>
               {% endif %}
               
               {% if perms.dashboard.chart_dataset %}
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Charts<b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="{% url dashboard.chart_list %}">All Charts</a></li>
-                  <li><a href="{% url dashboard.chart_editor %}" >New Chart</a></li>
+                  <li><a href="{% url 'dashboard.chart_list' %}">All Charts</a></li>
+                  <li><a href="{% url 'dashboard.chart_editor' %}" >New Chart</a></li>
                 </ul>
               </li>
               {% endif %}
@@ -80,15 +80,15 @@
                   {% endif %}
                   
                   {% if perms.malaria.malariasettings_update %}
-                  <li><a href="{% url malaria.malariasettings_update %}">Settings</a></li>
+                  <li><a href="{% url 'malaria.malariasettings_update' %}">Settings</a></li>
                   {% endif %}
                   
                   {% if perms.text.text_list %}
-                  <li><a href="{% url text.text_list %}">Translations</a></li>
+                  <li><a href="{% url 'text.text_list' %}">Translations</a></li>
                   {% endif %}
                   
                   {% if perms.rapidsms_httprouter.message_list %}
-                  <li><a href="{% url console.message_list %}">SMS Log</a></li>
+                  <li><a href="{% url 'console.message_list' %}">SMS Log</a></li>
                   {% endif %}
                   
                 </ul>
@@ -99,9 +99,9 @@
             <ul class="nav pull-right">
               {% block login %}
               {% if request.user and request.user.is_authenticated %}
-              <li class="pull-right"><a href="{% url users.user_logout %}?go=/">{{ request.user.username }} | logout</a></li>
+              <li class="pull-right"><a href="{% url 'users.user_logout' %}?go=/">{{ request.user.username }} | logout</a></li>
               {% else %}
-              <li class="pull-right"><a href="{% url users.user_login %}">Login</a></li>
+              <li class="pull-right"><a href="{% url 'users.user_login' %}">Login</a></li>
               {% endif %}
               {% endblock %}
             </ul>
