@@ -36,7 +36,7 @@ class Chart (SmartModel):
 
     title = models.CharField(max_length=255, help_text='The title for this chart')
     subtitle = models.CharField(max_length=255, help_text='The subtitle shown below the title', blank=True, null=True)
-
+    show_axis_y = models.BooleanField(default=False, help_text='Hide or show the Y axis lines')
     axis_x = models.CharField(max_length=255, help_text='The label on the bottom of the chart', blank=True, null=True)
     axis_y = models.CharField(max_length=255, help_text='The label on the left of the chart', blank=True, null=True)
     axis_y2 = models.CharField(max_length=255, help_text='The label on the right of the chart', blank=True, null=True)
@@ -50,7 +50,8 @@ class Chart (SmartModel):
 
     def to_dict(self):
         chart = dict(interval=self.interval, id=self.pk)
-        labels = dict(title=self.title, subtitle=self.subtitle, x=self.axis_x, y=self.axis_y, y2=self.axis_y2)
+        labels = dict(title=self.title, subtitle=self.subtitle, x=self.axis_x,
+                      show_axis_y=self.show_axis_y, y=self.axis_y, y2=self.axis_y2)
         chart['labels'] = labels
         chart['dataset'] = self.model_class
         chart['options'] = dict(stacked=self.stacked)

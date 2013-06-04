@@ -149,6 +149,13 @@ function render_chart(chart, container, options) {
         }
     }
 
+    var linewidth;
+    if(chart.labels.show_axis_y == true) {
+        linewidth = 1;
+    }else{
+        linewidth = 0;        
+    }
+
     var hc = new Highcharts.Chart({
         credits: { enabled: false },
         chart: {
@@ -175,7 +182,13 @@ function render_chart(chart, container, options) {
         yAxis: [
             {
                 title: { text: chart.labels.y },
-                min: 0
+                min: 0,
+                lineWidth:linewidth,
+                minorTickInterval: 'auto',
+                minorTickPosition: 'outside',
+                minorGridLineColor: '#FFFFFF',
+                minorTickWidth:linewidth,
+                minorTickLength: 4
             },{
                 title: { text: chart.labels.y2 },
                 min: 0,

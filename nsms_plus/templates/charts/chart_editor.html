@@ -140,6 +140,12 @@
         $("#y_label").val(chart.labels.y);
         $("#y2_label").val(chart.labels.y2);
 
+        if(chart.labels.show_axis_y == true) {
+            $("#show_axis_y_label").attr("checked", true);
+        }
+
+        $("#show_axis_y_label").val(chart.labels.show_axis_y);
+
         if (chart.options.stacked == null) {
             $('#btn_none').button('toggle');
         } else if (chart.options.stacked == "normal") {
@@ -371,6 +377,7 @@
         chart.labels.x = $("#x_label").val();
         chart.labels.y = $("#y_label").val();
         chart.labels.y2 = $("#y2_label").val();
+        chart.labels.show_axis_y = $('#show_axis_y_label').attr('checked') ? true : false;
 
         // make sure there is at least a title so
         // there is something to click on
@@ -503,6 +510,8 @@
         <div class="chart_label">Bottom (x-axis)</div><input class="chart_input" id="x_label" type="text" name="name" value="" maxlength="64" />
         <div class="chart_label">Left (y-axis)</div><input class="chart_input" id="y_label" type="text" name="name" value="" maxlength="64" />
         <div class="chart_label">Right (y-axis)</div><input class="chart_input" id="y2_label" type="text" name="name" value="" maxlength="64" />
+        <hr/>
+        <div class="chart_label"></div><input type="checkbox" name="name" id="show_axis_y_label" value="" /> Show (Y-axis lines)
         <hr/>
 
         <div class="chart_label">Interval</div>

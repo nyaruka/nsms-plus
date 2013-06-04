@@ -87,13 +87,14 @@ class ChartCRUDL(SmartCRUDL):
                 chart = Chart.objects.get(pk=request.REQUEST['chart'])
             else:
                 chart.created_by = request.user
-
+                
             labels = chart_spec['labels']
             chart.modified_by = request.user
             chart.model_class=chart_spec['dataset']
             chart.title=labels['title']
             chart.subtitle=labels['subtitle']
             chart.axis_x=labels['x']
+            chart.show_axis_y=labels['show_axis_y']
             chart.axis_y=labels['y']
             chart.axis_y2=labels['y2']
             chart.interval = chart_spec['interval']
@@ -102,7 +103,7 @@ class ChartCRUDL(SmartCRUDL):
                 chart.stacked = None
             else:
                 chart.stacked = chart_spec['options']['stacked']
-
+                
             chart.save()
 
             # now let's have a look at the series data
